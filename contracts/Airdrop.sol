@@ -159,7 +159,7 @@ interface IERC20 {
 
 /* ERC-20 Airdrop */
 contract Airdrop is Ownable{
-
+    using SafeMath for uint256;
     address private _tokenAddress;
 
     event TokenAddressChanged(address indexed previousTokenAddress, address indexed newTokenAddress);
@@ -181,6 +181,22 @@ contract Airdrop is Ownable{
 
     function airdrop(address[] memory _addrs, uint256[] memory _values) public onlyOwner {
         require(_addrs.length == _values.length);
+        IERC20 token = IERC20(_tokenAddress);
+
+        for(uint256 i = 0; i < _addrs.length; i++) {
+            require(token.transfer(_addrs[i], _values[i]));
+        }
+    }
+
+    function airdropAfterVerification(address[] memory _addrs, uint256[] memory _values, uint256 totalValue) public onlyOwner {
+        require(_addrs.length == _values.length);
+        uint256 verificationValue = 0;
+
+        for(uint256 i = 0; i < _values.length; i++) {
+            verificationValue = verificationValue.add(_values[i]);
+        }
+
+        require(verificationValue == totalValue);
         IERC20 token = IERC20(_tokenAddress);
 
         for(uint256 i = 0; i < _addrs.length; i++) {
